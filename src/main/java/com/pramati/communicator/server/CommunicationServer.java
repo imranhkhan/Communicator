@@ -25,12 +25,13 @@ public class CommunicationServer {
 
 	private void startListening() {
 		ConnectionListener conListener = new ConnectionListener();
-		EchoThread echoer = new EchoThread();
+		EchoHandler echoHandler = new EchoHandler();
 		conListener.setSelector(selector);
-		conListener.setEchoThread(echoer);
-		Thread echoerThread = new Thread(echoer);
+		conListener.setEchoHandler(echoHandler);
+
+		Thread echoHandlerThread = new Thread(echoHandler);
 		Thread conListenrThread = new Thread(conListener);
-		echoerThread.start();
+		echoHandlerThread.start();
 		conListenrThread.start();
 	}
 

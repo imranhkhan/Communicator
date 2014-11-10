@@ -13,13 +13,13 @@ public class CommunicationClient {
 	private final int BUFFER_SIZE = 30;
 
 	public boolean connect(String host, int port) throws IOException {
-		boolean isConnected = false;
+		boolean connected = false;
 		socketChannel = SocketChannel.open();
 		if (!socketChannel.isConnected()) {
-			isConnected = socketChannel.connect(new InetSocketAddress(host,
-					port));
+			connected = socketChannel
+					.connect(new InetSocketAddress(host, port));
 		}
-		return isConnected;
+		return connected;
 	}
 
 	public void write(String message) throws IOException {
@@ -32,11 +32,13 @@ public class CommunicationClient {
 
 	public String read() throws IOException {
 		String message = "";
+
 		ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		if (socketChannel.read(byteBuffer) > 0) {
 			byteBuffer.flip();
 			message += Charset.defaultCharset().decode(byteBuffer).toString();
 		}
+		close();
 		return message;
 	}
 

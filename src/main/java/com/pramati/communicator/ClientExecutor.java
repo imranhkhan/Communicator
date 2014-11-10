@@ -9,15 +9,14 @@ import com.pramati.communicator.client.ClientExecutorThread;
 
 public class ClientExecutor {
 
-	private static final String PREFIX = "Welcome connection";
+	private static final String PREFIX = "Welcome! connection-";
 
 	public static void main(String[] args) throws IOException {
 		int counter = 1;
 		if (args.length > 0) {
 			int nConnection = Integer.valueOf(args[0]);
-			ExecutorService executor = Executors
-					.newFixedThreadPool(nConnection);
-			final CountDownLatch startLatch = new CountDownLatch(nConnection);
+			ExecutorService executor = Executors.newFixedThreadPool(100);
+			final CountDownLatch startLatch = new CountDownLatch(100);
 			while (nConnection != 0) {
 				String message = PREFIX + counter;
 				ClientExecutorThread clientExecutorThread = new ClientExecutorThread(

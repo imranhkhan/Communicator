@@ -13,15 +13,16 @@ import java.util.Set;
 public class ConnectionListener implements Runnable {
 
 	private Selector selector;
-	private EchoThread echoThread;
+	private EchoHandler echoHandler;
 	private final int BUFFER_SIZE = 30;
+	ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 
 	public void setSelector(Selector selector) {
 		this.selector = selector;
 	}
 
-	public void setEchoThread(EchoThread echoThread) {
-		this.echoThread = echoThread;
+	public void setEchoHandler(EchoHandler echoHandler) {
+		this.echoHandler = echoHandler;
 	}
 
 	public void run() {
@@ -62,23 +63,23 @@ public class ConnectionListener implements Runnable {
 	}
 
 	private void read(SelectionKey selectionKey) throws IOException {
-		int count = 0;
-		String message = "";
 		SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-		ByteBuffer byteBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-		if ((count = socketChannel.read(byteBuffer)) > 0) {
-			byteBuffer.flip();
-			message += Charset.defaultCharset().decode(byteBuffer).toString();
+		try {
+			byteBuffer.clear();
+			if (socketChannel.read(byteBuffer) != -1) {
+				byteBuffer.flip();
+				echoHandler.handleMessage(socketChannel, Charset
+						.defaultCharset().decode(byteBuffer).toString());
+			} else {   //End of Stream
+				cancle(selectionKey);
+			}
+		} catch (IOException io) {
+			cancle(selectionKey);
 		}
-		echoThread.getSocketmap().put(socketChannel, message);
-		closeAtEOF(socketChannel, count);
-		byteBuffer.clear();
 	}
 
-	private void closeAtEOF(SocketChannel socketChannel, int count)
-			throws IOException {
-		if (count < 0) {
-			socketChannel.close();
-		}
+	private void cancle(SelectionKey selectionKey) throws IOException {
+		selectionKey.cancel();
+		selectionKey.channel().close();
 	}
 }
